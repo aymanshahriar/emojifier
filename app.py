@@ -1,9 +1,10 @@
 from flask import Flask, request, jsonify
+from typing import Any
 
-app = Flask(__name__)
+app: Flask = Flask(__name__)
 
 @app.route('/api/emojify', methods=['POST'])
-def handle_post():
+def handle_post() -> tuple[Any, int]:
     """Handle POST request with integer and jpg image"""
     try:
         # Get integer parameter
@@ -29,7 +30,7 @@ def handle_post():
             return jsonify({'status': 'error', 'message': 'Image must be a jpg/jpeg file'}), 400
         
         # Process the data here
-        response = {
+        response: dict[str, Any] = {
             'status': 'success',
             'message': 'Data received successfully',
             'integer': integer_value,
@@ -42,7 +43,7 @@ def handle_post():
         return jsonify({'status': 'error', 'message': str(e)}), 400
 
 @app.route('/test', methods=['GET'])
-def test():
+def test() -> tuple[Any, int]:
     """Test endpoint"""
     return jsonify({'message': 'api is running'}), 200
 
