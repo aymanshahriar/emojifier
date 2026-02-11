@@ -1,29 +1,38 @@
 # A simple script to calculate BMI
 import pywebio
 from pywebio.input import file_upload, select, input_group
-from pywebio.output import put_image, put_file, put_markdown, put_html, put_button
+from pywebio.output import put_image, put_markdown, put_html, put_button, style, put_text, put_buttons
 
 import glob
 from PIL import Image
+from pywebio.session import download
 from scipy import spatial
 import numpy as np
 import os
+'''
+def put_file(name, content, label=None, scope=None) -> Output:
 
-
+    if label is None:
+        label = name
+    output = put_buttons(buttons=[name], 
+                         onclick=[lambda: download(name, content)],
+                         scope=scope, position=position)
+    return output
+'''
 
 def emojify(main_photo_path, size):
-    tile_photos_path = "tiles/*"
+    tile_photos_path = "emojis/*"
     #size = 10
     tile_size = (size, size)
     output_path = "more_" + str(size) + ".jpg"
 
-    # Get all tiles
+    # Get all emojis
     tile_paths = []
     for file in glob.glob(tile_photos_path):
         tile_paths.append(file)
     #print(len(tile_paths))
 
-    # Import and resize all tiles   (I can save the resized images)
+    # Import and resize all emojis   (I can save the resized images)
     tiles = []
     # i = 1
     for path in tile_paths:
@@ -33,7 +42,7 @@ def emojify(main_photo_path, size):
         tiles.append(tile)
         # print(i, "/", "3577")
         # i += 1
-    print(len(tiles))
+    #print(len(emojis))
 
     # Calculate dominant color or each emoji     (I can save this)
     colors = []
@@ -50,15 +59,11 @@ def emojify(main_photo_path, size):
     resized_photo = main_photo.resize((width, height))
 
     # Find closest tile photo for every pixel
-
     # Create a KDTree
-    print("************ Reached here")
     tree = spatial.KDTree(colors)
 
-    # Empty integer array to store indices of tiles
-
+    # Empty integer array to store indices of emojis
     closest_tiles = np.zeros((width, height), dtype=np.uint32)
-    print("************ Reached here also")
     for i in range(width):
         for j in range(height):
             pixel = resized_photo.getpixel((i, j))  # Get the pixel color at (i, j)
@@ -69,7 +74,7 @@ def emojify(main_photo_path, size):
     print("************ Reached here 3")
     # Create an output image
     output = Image.new('RGB', main_photo.size)
-    # Draw tiles
+    # Draw emojis
     for i in range(width):
         for j in range(height):
             # Offset of tile
@@ -84,17 +89,47 @@ def emojify(main_photo_path, size):
     put_markdown('<br><hr><br>')
     put_image(open(output_path, 'rb').read())
     content = open(output_path, 'rb').read()
-    put_markdown('<br>')
-    put_file('emojified.jpg', content, 'download me')
+    put_markdown('<br><br>')
+    #p = put_file('emojified.jpg', content, 'download me').style('background-color: #f44336; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block;')
 
+    put_button('Click to download\nthe emojified image', lambda: download('emojified.jpg', content)).style( 'display: block; margin-left: auto; margin-right: auto;')
+    #.style('background-color: #f44336; color: white; padding: 14px 25px; text-align: center; text-decoration: none; display: inline-block;')
+
+    put_markdown('<br><br>')
 
 def bmi():
+
+    title = '''<!-- HTML Codes by Quackit.com -->
+    <!DOCTYPE html>
+    <title>Text Example</title>
+    <style>
+    div.container {
+    background-color: #ffffff;
+    }
+    div.container p {
+    text-align: center;
+    font-family: Cursive;
+    font-size: 48px;
+    font-style: normal;
+    font-weight: bold;
+    text-decoration: none;
+    text-transform: none;
+    color: #fce94f;
+    background-color: #ffffff;
+    }
+    </style>
+
+    <div class="container">
+    <p>😀❤️🕵️🧠🍆   Emojifier    🍔🐙👍🏼🤬☠️</p>
+    </div>'''
+    put_html(title)
+
+    put_html('<br><hr><br>')
 
     img = file_upload("Select a picture that you want to emojify:", accept="image/*")
 
     dropdown_list = [("Extra Small", 5), ("Small", 10), ("Medium", 20), ("Large", 50)]
-    size = pywebio.input.select(label="this is the label", options=dropdown_list)
-
+    size = pywebio.input.select(label="Select the size of the Emojis", options=dropdown_list)
     put_image(img['content'])  # display image on webpage
     open('userImage/' + img['filename'], 'wb').write(img['content'])   # put image inside userImage file
 
@@ -104,9 +139,8 @@ def bmi():
     emojify(imagePath, size)   ##### create a function that takes the location of the user's image, emojifies it, prints it on the screen and let's the user download
 
 
-
 if __name__ == '__main__':
-        port = int(os.environ.get("PORT", 5002))
+        port = int(os.environ.get("PORT", 5000))
         pywebio.start_server(bmi, port=port)
 
 
@@ -120,8 +154,19 @@ if __name__ == '__main__':
 
 
 
+'''
+    dropdown_list = [("Extra Small", 5), ("Small", 10), ("Medium", 20), ("Large", 50)]
+    info = input_group("User info", [
+        file_upload("Select a picture that you want to emojify:", accept="image/*", name="img"),
+        select(label="Select the size/granularity of the emojis:", options=dropdown_list, name="size")
+    ])
 
+    put_image(info['img']['content'])  # display image on webpage
+    open('userImage/' + info['img']['filename'], 'wb').write(info['img']['content'])   # put image inside userImage file
+    imagePath = 'userImage/' + info['img']['filename']
 
+    size = info['size']
 
+    emojify(imagePath, size)   ##### create a function that takes the location of the user's image, emojifies it, prints it on the screen and let's the user download
 
-
+'''
