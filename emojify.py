@@ -5,7 +5,6 @@ from scipy import spatial
 import numpy as np
 
 
-
 class Emojifier:
     # There are 3 class variables:
     # 1) emojis_path: the path of the directory containing all the emojis
@@ -68,7 +67,7 @@ class Emojifier:
         # Return this emojified image
         return emojified_image
 
-    def emojify_image_path(self, image_path: str = "images/pink.jpg", size: int = 10) -> Image:
+    def emojify_image_path(self, image_path: str = "sample_images/hasina.jpg", size: int = 7) -> Image:
         image = Image.open(image_path)
         emojified_image = self.emojify(image, size)
         return emojified_image

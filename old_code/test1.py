@@ -32,7 +32,7 @@ def emojify(main_photo_path, size):
         tile_paths.append(file)
     #print(len(tile_paths))
 
-    # Import and resize all emojis   (I can save the resized images)
+    # Import and resize all emojis   (I can save the resized sample_images)
     tiles = []
     # i = 1
     for path in tile_paths:

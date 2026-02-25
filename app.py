@@ -1,8 +1,14 @@
 from flask import Flask, request, jsonify, send_file
 from typing import Any
-from emojify import emojify
+from emojify import Emojifier
 from PIL import Image
 import io
+
+# Create emojifier object. This will result in the kdtree being created and the emojis being loaded into memory only
+# once during the entire runtime
+emojifier = Emojifier()
+
+# Define endpoints using flask
 app: Flask = Flask(__name__)
 
 @app.route('/api/emojify', methods=['POST'])
@@ -30,7 +36,7 @@ def handle_post() -> tuple[Any, int]:
 
         # Call the emojify function
         image: Image = Image.open(image_file)
-        emojified_image: Image = emojify(image, granularity)
+        emojified_image: Image = emojifier.emojify(image, granularity)  #################### OVER HERE
 
         # Return the emojified image to the user
         # Save the image into a BytesIO object
