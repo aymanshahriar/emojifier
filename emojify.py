@@ -30,11 +30,10 @@ class Emojifier:
         # Create a KDTree consisting of all the mean colors
         self.tree = spatial.KDTree(emoji_mean_colors)
 
-    def emojify(self, image: Image, size = 10) -> Image:
-        # Sources and settings
-        emoji_size = (size, size)
-
+    def emojify(self, image: Image, num_emojis_in_longer_side = 10) -> Image:
         # Resize emojis
+        size = round(max(image.size) / num_emojis_in_longer_side)
+        emoji_size = (size, size)
         resized_emojis = [emoji.resize(emoji_size) for emoji in self.emojis]
 
         # Pixelate (resize) main photo
@@ -53,7 +52,7 @@ class Emojifier:
 
         # Create an "empty" image
         emojified_image = Image.new('RGB', image.size)
-        emojified_image.filename = 'emojified_' + str(size) + '_' + os.path.basename(image.filename)
+        emojified_image.filename = 'emojified_' + str(num_emojis_in_longer_side) + '_' + os.path.basename(image.filename)
 
         # Paste emojis on that "empty" image
         for w in range(width):
@@ -67,14 +66,14 @@ class Emojifier:
         # Return this emojified image
         return emojified_image
 
-    def emojify_image_path(self, image_path: str = "sample_images/hasina.jpg", size: int = 7) -> Image:
+    def emojify_image_path(self, image_path: str = "sample_images/hasina.jpg", num_emojis_in_longer_side = 10) -> Image:
         image = Image.open(image_path)
-        emojified_image = self.emojify(image, size)
+        emojified_image = self.emojify(image, num_emojis_in_longer_side)
         return emojified_image
 
 if __name__ == '__main__':
     emojifier = Emojifier()
-    emojified_image: Image = emojifier.emojify_image_path()
+    emojified_image: Image = emojifier.emojify_image_path(num_emojis_in_longer_side = 30)
 
     # Save output
     emojified_image.save('results/' + emojified_image.filename)
