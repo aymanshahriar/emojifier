@@ -73,7 +73,7 @@ class Emojifier:
 
 if __name__ == '__main__':
     emojifier = Emojifier()
-    emojified_image: Image = emojifier.emojify_image_path(num_emojis_in_longer_side = 30)
+    emojified_image: Image = emojifier.emojify_image_path(num_emojis_in_longer_side = 90)
 
     # Save output
     emojified_image.save('results/' + emojified_image.filename)
