@@ -1,121 +1,74 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
-import heroImg from './assets/hero.png'
-import './App.css'
+
+/** Stand-in base URL until proxy/env is configured */
+const API_ORIGIN = 'http://localhost:5000'
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [uploadedImage, setUploadedImage] = useState(null)
+  const [emojifiedImage, setEmojifiedImage] = useState(null)
+  const [granularity, setGranularity] = useState(250)
+  
+  function handleImageUpload(e) {
+    const file = e.target.files[0]
+    if (file) {
+      setUploadedImage(file)
+    }
+  }
 
+  async function handleSubmit(e) {
+    e.preventDefault()
+    if (!uploadedImage) return
+
+    const formData = new FormData()
+    formData.append('granularity', String(granularity))
+    formData.append('image', uploadedImage)
+
+    try {
+      const res = await fetch(`${API_ORIGIN}/api/emojify`, {
+        method: 'POST',
+        body: formData,
+      })
+      console.log(res)
+      if (!res.ok) {
+        const errText = await res.text()
+        console.error(errText || `Request failed: ${res.status}`)
+        return
+      }
+
+      const blob = await res.blob()
+      setEmojifiedImage(blob)
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  function handleDownload() {
+    const link = document.createElement('a')
+    link.href = URL.createObjectURL(emojifiedImage)
+    link.download = `emojified_${uploadedImage.name}`
+    link.click()
+  }
+
+
+  
   return (
-    <>
-      <section id="center">
-        <div className="hero">
-          <img src={heroImg} className="base" width="170" height="179" alt="" />
-          <img src={reactLogo} className="framework" alt="React logo" />
-          <img src={viteLogo} className="vite" alt="Vite logo" />
-        </div>
-        <div>
-          <h1>Get started</h1>
-          <p>
-            Edit <code>src/App.jsx</code> and save to test <code>HMR</code>
-          </p>
-        </div>
-        <button
-          type="button"
-          className="counter"
-          onClick={() => setCount((count) => count + 1)}
-        >
-          Count is {count}
-        </button>
-      </section>
+    <main className="app-shell">
+      <h1>Emojifier</h1>
+      <form onSubmit={handleSubmit}>
+        <label htmlFor='image-upload'>Upload Image</label>
+        <input type='file' accept='image/*' id='image-upload' onChange={handleImageUpload} />
+        
+        <label htmlFor='granularity'>Granularity (number of emojis in the longer side of the image)</label>
+        <input type='number' defaultValue={250} id='granularity' min={1} 
+        onChange={e => setGranularity(e.target.value)}/>
 
-      <div className="ticks"></div>
+        {uploadedImage && <button type='submit'>Emojify!</button>}
 
-      <section id="next-steps">
-        <div id="docs">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#documentation-icon"></use>
-          </svg>
-          <h2>Documentation</h2>
-          <p>Your questions, answered</p>
-          <ul>
-            <li>
-              <a href="https://vite.dev/" target="_blank">
-                <img className="logo" src={viteLogo} alt="" />
-                Explore Vite
-              </a>
-            </li>
-            <li>
-              <a href="https://react.dev/" target="_blank">
-                <img className="button-icon" src={reactLogo} alt="" />
-                Learn more
-              </a>
-            </li>
-          </ul>
-        </div>
-        <div id="social">
-          <svg className="icon" role="presentation" aria-hidden="true">
-            <use href="/icons.svg#social-icon"></use>
-          </svg>
-          <h2>Connect with us</h2>
-          <p>Join the Vite community</p>
-          <ul>
-            <li>
-              <a href="https://github.com/vitejs/vite" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#github-icon"></use>
-                </svg>
-                GitHub
-              </a>
-            </li>
-            <li>
-              <a href="https://chat.vite.dev/" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#discord-icon"></use>
-                </svg>
-                Discord
-              </a>
-            </li>
-            <li>
-              <a href="https://x.com/vite_js" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#x-icon"></use>
-                </svg>
-                X.com
-              </a>
-            </li>
-            <li>
-              <a href="https://bsky.app/profile/vite.dev" target="_blank">
-                <svg
-                  className="button-icon"
-                  role="presentation"
-                  aria-hidden="true"
-                >
-                  <use href="/icons.svg#bluesky-icon"></use>
-                </svg>
-                Bluesky
-              </a>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <div className="ticks"></div>
-      <section id="spacer"></section>
-    </>
+      </form>
+      {uploadedImage && <img src={URL.createObjectURL(uploadedImage)} alt='Uploaded image' />}
+      {emojifiedImage && <img src={URL.createObjectURL(emojifiedImage)} alt='Emojified image' />}
+      {emojifiedImage && <button onClick={handleDownload}>Download</button>}
+    </main>
   )
 }
 
