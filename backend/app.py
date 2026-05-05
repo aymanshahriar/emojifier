@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify, send_file
+from flask_cors import CORS
 from typing import Any
 from emojify import Emojifier
 from PIL import Image
@@ -10,6 +11,7 @@ emojifier = Emojifier()
 
 # Define endpoints using flask
 app: Flask = Flask(__name__)
+CORS(app)
 
 @app.route('/api/emojify', methods=['POST'])
 def handle_post() -> tuple[Any, int]:
