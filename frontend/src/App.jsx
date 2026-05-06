@@ -33,6 +33,12 @@ function App() {
     e.preventDefault()
     if (!uploadedImage) return
 
+    const granularityNum = Number(granularity)
+    if (Number.isNaN(granularityNum) || granularityNum < 1 || granularityNum > 1000) {
+      setErrorMessage('Granularity must be a number between 1 and 1000')
+      return
+    }
+
     const formData = new FormData()
     formData.append('granularity', String(granularity))
     formData.append('image', uploadedImage)
@@ -155,7 +161,8 @@ function App() {
                   value={granularity}
                   id="granularity"
                   min={1}
-                  onChange={(e) => setGranularity(Number(e.target.value))}
+                  max={1000}
+                  onChange={(e) => setGranularity(e.target.value)}
                   className={`w-full rounded-lg border px-3 py-2 text-sm outline-none ring-indigo-500 transition focus:ring-2 ${
                     isDarkMode
                       ? 'border-slate-700 bg-slate-950'
